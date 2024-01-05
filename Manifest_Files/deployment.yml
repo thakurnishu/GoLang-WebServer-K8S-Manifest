@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gowebserver-deployment
+  name: goserver-deployment
   labels:
-    app: gowebserver
+    app: goserver
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gowebserver
+      app: goserver
   template:
     metadata:
       labels:
-        app: gowebserver
+        app: goserver
     spec:
       containers:
       - name: gowebserver

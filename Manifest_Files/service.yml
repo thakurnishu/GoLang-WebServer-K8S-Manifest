@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: gowebserver-service
+  name: goserver-service
   labels:
-    app: gowebserver
+    app: goserver
 spec:
   selector:
-    app: gowebserver
+    app: goserver
   ports:
     - protocol: TCP
       port: 80
