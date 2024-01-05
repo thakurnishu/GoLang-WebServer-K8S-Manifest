@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowebserver-deployment
+  labels:
+    app: gowebserver
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gowebserver
+  template:
+    metadata:
+      labels:
+        app: gowebserver
+    spec:
+      containers:
+      - name: gowebserver
+        image: mahakal0510/gowebserver:tagVersion 
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            memory: "256Mi"  # Set your desired memory limit
+            cpu: "100m"      # Set your desired CPU limit
+          requests:
+            memory: "128Mi"  # Set your desired memory request
+            cpu: "50m"       # Set your desired CPU request
