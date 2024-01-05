@@ -15,7 +15,7 @@ spec:
         app: goserver
     spec:
       containers:
-      - name: gowebserver
+      - name: goserver
         image: mahakal0510/gowebserver:tagVersion 
         ports:
         - containerPort: 8000
