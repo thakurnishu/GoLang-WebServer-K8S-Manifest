@@ -13,9 +13,10 @@ pipeline{
         SERVICE_PRINCIPAL_ID = credentials('principal_id')
         SERVICE_PRINCIPAL_PASSWORD = credentials('principal_password')
         STORAGE_KEY = credentials('azure_storage_key')
+        GITHUB_EMAIL= credentials('github_email')
+        GITHUB_CRED_ID= 'github'
         IMAGENAME = 'gowebserver'
-        DOCKERHUB_USER= 'mahakal0510'
-        DOCKERHUB_EMAIL= credentials('docker-email')
+        GITHUB_USER= 'thakurnishu'
     }
 
     stages{
@@ -105,10 +106,10 @@ pipeline{
                     def gitHubURL = "https://github.com/thakurnishu/GoLang-WebServer-K8S-Manifest.git"
                     def requiredURL = gitHubURL.replace("https://", "").replace(".git", "")
                     pushManifestGithub(
-                        githubUserName: DOCKERHUB_USER,
-                        githubEmail: DOCKERHUB_EMAIL,
+                        githubUserName: GITHUB_USER,
+                        githubEmail: GITHUB_EMAIL,
                         imageTag: "${params.ImageTag}",
-                        githubCredID: 'github',
+                        githubCredID: GITHUB_CRED_ID,
                         githubURL: requiredURL
                     )
                 }
