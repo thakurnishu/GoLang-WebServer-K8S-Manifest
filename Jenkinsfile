@@ -17,6 +17,7 @@ pipeline{
         GITHUB_CRED_ID= 'github'
         IMAGENAME = 'gowebserver'
         GITHUB_USER= 'thakurnishu'
+        GITHUB_URL= "https://github.com/thakurnishu/GoLang-WebServer-K8S-Manifest.git"
     }
 
     stages{
@@ -32,54 +33,54 @@ pipeline{
                 script{
                     gitCheckout(
                         branch: "main",
-                        url: "https://github.com/thakurnishu/GoLang-WebServer-K8S-Manifest.git"
+                        url: GITHUB_URL
                     )
                 }
             }
         }
-        // stage('Terraform Initialization'){
-        //     steps{
-        //         script{
-        //             terraInit(STORAGE_KEY)
-        //         }
-        //     }
-        // }
-        // stage('Terraform Plan'){
-        //     steps{
-        //         script{
-        //             terraPlan(
-        //                 SUBSCRIPTION_ID: AZURE_SUBSCRIPTION_ID,
-        //                 TENANT_ID: AZURE_TENANT_ID,
-        //                 PRINCIPAL_ID: SERVICE_PRINCIPAL_ID,
-        //                 PRINCIPAL_PASSWORD: SERVICE_PRINCIPAL_PASSWORD
-        //             )
-        //         }
-        //     }
-        // }
-        // stage('Terraform Apply'){
-        //     steps{
-        //         script{
-        //             terraApply()
-        //         }
-        //     }
-        // }
-        // stage('Connecting to Kubernetes Cluster'){
-        //     steps{
-        //         script{
-        //             connectToK8S()
-        //         }
-        //     }
-        // }
-        // stage('Installing ArgoCD'){
-        //     steps{
-        //         script{
-        //             sh """
-        //                 chmod +x InstallArgoCD.sh
-        //                 sh InstallArgoCD.sh
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Terraform Initialization'){
+            steps{
+                script{
+                    terraInit(STORAGE_KEY)
+                }
+            }
+        }
+        stage('Terraform Plan'){
+            steps{
+                script{
+                    terraPlan(
+                        SUBSCRIPTION_ID: AZURE_SUBSCRIPTION_ID,
+                        TENANT_ID: AZURE_TENANT_ID,
+                        PRINCIPAL_ID: SERVICE_PRINCIPAL_ID,
+                        PRINCIPAL_PASSWORD: SERVICE_PRINCIPAL_PASSWORD
+                    )
+                }
+            }
+        }
+        stage('Terraform Apply'){
+            steps{
+                script{
+                    terraApply()
+                }
+            }
+        }
+        stage('Connecting to Kubernetes Cluster'){
+            steps{
+                script{
+                    connectToK8S()
+                }
+            }
+        }
+        stage('Installing ArgoCD'){
+            steps{
+                script{
+                    sh """
+                        chmod +x InstallArgoCD.sh
+                        sh InstallArgoCD.sh
+                    """
+                }
+            }
+        }
         stage('Update Manifest Files: K8S'){
             steps{
                 script{
@@ -103,8 +104,7 @@ pipeline{
         stage('Push Manifest Files: Github'){
             steps{
                 script{
-                    def gitHubURL = "https://github.com/thakurnishu/GoLang-WebServer-K8S-Manifest.git"
-                    def requiredURL = gitHubURL.replace("https://", "").replace(".git", "")
+                    def requiredURL = GITHUB_URL.replace("https://", "").replace(".git", "")
                     pushManifestGithub(
                         githubUserName: GITHUB_USER,
                         githubEmail: GITHUB_EMAIL,
