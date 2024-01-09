@@ -8,9 +8,94 @@ env:
   IMAGE_TAG: ${{ github.event.client_payload.imageTag }}
   IMAGE_NAME: ${{ github.event.client_payload.imageName }}
 
+  AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_PRINCIPAL_ID: ${{ secrets.AZURE_PRINCIPAL_ID }}
+  AZURE_PRINCIPAL_PASSWORD: ${{ secrets.AZURE_PRINCIPAL_PASSWORD }}
+
+  EMAIL_GITHUB: ${{  secrets.EMAIL_GITHUB }}
+  PASS_GITHUB: ${{ secrets.PASS_GITHUB }}
+
 jobs:
-    test:
-      runs-on: [self-hosted, Linux, X64, Laptop]
-      steps:
-        - name: Testing
-          run: echo "Hello"
+
+  Git-Checkout:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - uses: actions/checkout@v4
+      
+  Terraform-Init:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Terraform Init
+        run: |
+          cd ${GITHUB_WORKSPACE}/AKS_Module
+          terraform init \
+          -backend-config="access_key=${AZURE_STORAGE_KEY}" \
+          -reconfigure 
+  
+  Terraform-Plan:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Terraform Plan
+        run: |
+          cd ${GITHUB_WORKSPACE}/AKS_Module
+          terraform plan \
+            -var AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID} \
+            -var AZURE_TENANT_ID=${AZURE_TENANT_ID} \
+            -var SERVICE_PRINCIPAL_ID=${AZURE_PRINCIPAL_ID} \
+            -var SERVICE_PRINCIPAL_PASSWORD=${AZURE_PRINCIPAL_PASSWORD} \
+            --var-file=./config/terraform.tfvars \
+            -out="terraform.tfplan"
+  
+  Terraform-Apply:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Terraform Apply
+        run: |
+          cd ${GITHUB_WORKSPACE}/AKS_Module
+          terraform apply -auto-approve "terraform.tfplan" 
+
+  Connect-To-K8S-Cluster:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Connecting To K8s Cluster
+        run: |
+          cd ${GITHUB_WORKSPACE}/AKS_Module
+          mkdir -p ${HOME}/.kube/
+          cp kubeconfig ${HOME}/.kube/config
+          kubectl get nodes
+  
+  Installing-ArgoCD-In-K8S:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Installing ArgoCD in K8S Cluster
+        run: |
+          chmod +x InstallArgoCD.sh
+          sh InstallArgoCD.sh
+    
+  Update-K8S-Manifest-Files:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Updating K8S Manifest File
+        run: |
+          cd ${GITHUB_WORKSPACE}/Manifest_Files
+          cat deployment.yml
+          sed -i "s|\\${IMAGE_NAME}.*|\\${IMAGE_NAME}:${IMAGE_TAG}|" deployment.yml
+          cat deployment.yml
+
+  Push-Manifest-Files-To-Github:
+    runs-on: [self-hosted, Linux, X64, Laptop]
+    steps:
+      - name: Pushing K8S Manifest File -> Github
+        run: |
+          cd  ${GITHUB_WORKSPACE}
+          git config --global user.name "$GITHUB_REPOSITORY_OWNER"
+          git config --global user.email "${EMAIL_GITHUB}"
+          git add Manifest_Files/deployment.yml
+          git commit -m "Updated Deployment Manifest with ${IMAGE_TAG} version"
+          git branch test
+          git checkout test
+          git push https://$GITHUB_REPOSITORY_OWNER:${PASS_GITHUB}@github/$GITHUB_REPOSITORY test:main
+    
+
