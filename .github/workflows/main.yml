@@ -1,0 +1,16 @@
+name: CD pipeline for Golang WebSerer
+
+on:
+  repository_dispatch:
+    types: [triggering-cd-workflow]
+
+env:
+  IMAGE_TAG: ${{ github.event.client_payload.imageTag }}
+  IMAGE_NAME: ${{ github.event.client_payload.imageName }}
+
+jobs:
+    test:
+      runs-on: [self-hosted, Linux, X64, Laptop]
+      steps:
+        - name: Testing
+          run: echo "Hello"
