@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: goserver
-        image: mahakal0510/gowebserver:v62
+        image: mahakal0510/gowebserver:v00
         ports:
         - containerPort: 8000
         resources:
