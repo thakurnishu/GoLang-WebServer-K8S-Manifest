@@ -102,7 +102,7 @@ jobs:
           git commit -m "Updated Deployment Manifest with ${IMAGE_TAG} version"
           git branch test
           git checkout test
-          git push https://$GITHUB_REPOSITORY_OWNER:${PASS_GITHUB}@github/$GITHUB_REPOSITORY test:main
+          git push https://$GITHUB_REPOSITORY_OWNER:${PASS_GITHUB}@github.com/$GITHUB_REPOSITORY test:main
     needs: [Update-K8S-Manifest-Files]
     
 
